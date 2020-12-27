@@ -2,9 +2,9 @@ name: Docker
 
 on:
   push:
-    # Publish `master` as Docker `latest` image.
+    # Publish `main` as Docker `latest` image.
     branches:
-      - master
+      - main
 
   # Run tests for any PRs.
   pull_request:
@@ -17,13 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cuda_version: [11.0, 11.1]
+        cuda_version: ["11.0", "11.1"]
         ros_distro: ["noetic", "melodic", "kinetic"]
 
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
-        run: ./BUILD-DOCKER-VERSION $IMAGE_NAME ${{matrix.cuda_version}} ${{matrix.ros_distro}}
+        run: ./BUILD-DOCKER-IMAGE.sh $IMAGE_NAME ${{matrix.cuda_version}} ${{matrix.ros_distro}}
 
   # Push image to GitHub Packages.
   push:
@@ -33,13 +33,13 @@ jobs:
     if: github.event_name == 'push'
     strategy:
       matrix:
-        cuda_version: [11.0, 11.1]
+        cuda_version: ["11.0", "11.1"]
         ros_distro: ["noetic", "melodic", "kinetic"]
 
     steps:
       - uses: actions/checkout@v2
       - name: Build image
-        run: ./BUILD-DOCKER-VERSION $IMAGE_NAME ${{matrix.cuda_version}} ${{matrix.ros_distro}}
+        run: ./BUILD-DOCKER-IMAGE.sh $IMAGE_NAME ${{matrix.cuda_version}} ${{matrix.ros_distro}}
 
       - name: Log into GitHub Container Registry
         run: echo "${{secrets.CR_PAT}}" | docker login https://ghcr.io -u ${{github.actor}} --password-stdin
